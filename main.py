@@ -38,11 +38,21 @@ if args.verbose:
         raise RuntimeError("Usage metadata is None")
 
 rslt = ''
+func_rslt = []
 if res.function_calls:
     for call in res.function_calls:
         # print(f"Calling function: {call.name}({call.args})")
-        func_call_rslt = call_function(call.name, call.args)
-        if func_call_rslt.parts == None:
+        func_call_rslt = call_function(call, call.args)
+        if not func_call_rslt.parts:
             raise Exception("Response is an empty list")
+        elif not func_call_rslt.parts[0].function_response:
+            raise Exception("Function response is none")
+        elif not func_call_rslt.parts[0].function_response.response:
+            raise Exception("Response is none")
+        else:
+            func_rslt.append(func_call_rslt.parts[0])
+            if args.verbose:
+                print(f"-> {func_call_rslt.parts[0].function_response.response}")
+
 else:
     print(f"Response: {res.text}")
